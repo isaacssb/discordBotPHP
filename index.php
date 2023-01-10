@@ -1,26 +1,28 @@
 <?php
-ini_set('memory_limit', '-1');
+
+include __DIR__ . '/vendor/autoload.php';
+include __DIR__ . '/credentials.php';
 
 use Discord\Discord;
-
-include 'vendor/autoload.php';
+use Discord\Parts\Channel\Message;
+use Discord\WebSockets\Intents;
+use Discord\WebSockets\Event;
 
 $discord = new Discord([
-    'token' => '',
+    'token' => TOKEN,
+    'intents' => [
+        Intents::GUILDS, Intents::GUILD_BANS, Intents::GUILD_MESSAGES, Intents::DIRECT_MESSAGES
+    ],
+
 ]);
 
 $discord->on('ready', function (Discord $discord) {
-    foreach ($discord->guilds as $guild) {
-        echo "Guild: {$guild->name} (" . $guild->members->count() . " membros)" . PHP_EOL;
-        echo "Channels: " . PHP_EOL;
-        foreach ($guild->channels as $channel) {
-            echo "\t\t{$channel->name}" . PHP_EOL;
-        }
-        echo "Membros: " . PHP_EOL;
-        foreach ($guild->members as $member) {;
-            echo "\t\t{$member->user->username}" . PHP_EOL;
-        }
-    }
+    echo "Bot is ready!", PHP_EOL;
+
+    // Listen for messages.
+    $discord->on(Event::MESSAGE_CREATE, function (Message $message, Discord $discord) {
+        echo "{$message->author->username}: {$message->content}", PHP_EOL;
+    });
 });
 
 $discord->run();
